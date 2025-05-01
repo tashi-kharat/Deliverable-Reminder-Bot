@@ -95,7 +95,7 @@ async def on_message(message):
         try:
             if due_date.date() == now.date():
                 # Due date is today, set reminder for 6 PM today
-                reminder_time = now.replace(hour=22, minute=30, second=0, microsecond=0).astimezone(INDIA_TZ)
+                reminder_time = now.replace(hour=18, minute=0, second=0, microsecond=0).astimezone(INDIA_TZ)
                 reminder_day = ""
                 whentext = "today"
                 digit = 6
@@ -104,7 +104,7 @@ async def on_message(message):
             else:
                 reminder_time = due_date - timedelta(days=1)
                 reminder_day = reminder_time.date()
-                reminder_time = reminder_time.replace(hour=22, minute=35, second=0, microsecond=0).astimezone(INDIA_TZ)
+                reminder_time = reminder_time.replace(hour=16, minute=0, second=0, microsecond=0).astimezone(INDIA_TZ)
                 whentext = "a day prior i.e. "
                 digit = 4
                 duewhen = "tomorrow"
