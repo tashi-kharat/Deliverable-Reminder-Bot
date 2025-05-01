@@ -9,11 +9,16 @@ from dateparser.search import search_dates
 import os
 import webserver
 from zoneinfo import ZoneInfo
+import logging
 
 # Enable required intents
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True  # Not strictly needed now, but safe to keep
+
+# Basic logging config
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 discord_token = os.environ['discordkey']
 FRANKFURT_TZ = ZoneInfo("Europe/Berlin")
@@ -54,15 +59,15 @@ def extract_date(text):
         text,
         settings={
             'PREFER_DATES_FROM': 'future',
-            'RELATIVE_BASE': datetime.now(FRANKFURT_TZ),
+            'RELATIVE_BASE': datetime.now(INDIA_TZ),
             'DATE_ORDER': 'DMY',
-            'TIMEZONE': 'Europe/Berlin',
+            'TIMEZONE': 'Asia/Kolkata',
             'RETURN_AS_TIMEZONE_AWARE': True
         },
         languages=['en']
     )
     if result:
-        return result[0][1].astimezone(FRANKFURT_TZ)
+        return result[0][1].astimezone(INDIA_TZ)
     return None
 
 @bot.event
@@ -85,12 +90,12 @@ async def on_message(message):
         after_by = get_text_after_timeframe_words(message.content, timeframe_words)
         due_date = extract_date(after_by)
         mentioned_mentions = ', '.join(user.mention for user in mentioned_users)
-        now = datetime.now(FRANKFURT_TZ)
+        now = datetime.now(INDIA_TZ)
 
         try:
             if due_date.date() == now.date():
                 # Due date is today, set reminder for 6 PM today
-                reminder_time = now.replace(hour=22, minute=30, second=0, microsecond=0).astimezone(FRANKFURT_TZ)
+                reminder_time = now.replace(hour=22, minute=30, second=0, microsecond=0).astimezone(INDIA_TZ)
                 reminder_day = ""
                 whentext = "today"
                 digit = 6
@@ -99,7 +104,7 @@ async def on_message(message):
             else:
                 reminder_time = due_date - timedelta(days=1)
                 reminder_day = reminder_time.date()
-                reminder_time = reminder_time.replace(hour=22, minute=35, second=0, microsecond=0).astimezone(FRANKFURT_TZ)
+                reminder_time = reminder_time.replace(hour=22, minute=35, second=0, microsecond=0).astimezone(INDIA_TZ)
                 whentext = "a day prior i.e. "
                 digit = 4
                 duewhen = "tomorrow"
@@ -116,7 +121,7 @@ async def on_message(message):
             )
 
         except (ValueError, TypeError, AttributeError):
-            print(f"A date could not be found for the action message https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}")
+            logger.warning(f"A date could not be found for the action message https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}")
 
 async def send_reminder_channel(channel_id, message_id, mentioned_mentions, duewhen):
     channel = bot.get_channel(channel_id)
