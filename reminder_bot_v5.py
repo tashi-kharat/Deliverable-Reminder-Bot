@@ -8,6 +8,7 @@ import dateparser
 from dateparser.search import search_dates
 import os
 import webserver
+from zoneinfo import ZoneInfo
 
 # Enable required intents
 intents = discord.Intents.default()
@@ -15,6 +16,9 @@ intents.message_content = True
 intents.members = True  # Not strictly needed now, but safe to keep
 
 discord_token = os.environ['discordkey']
+FRANKFURT_TZ = ZoneInfo("Europe/Berlin")
+INDIA_TZ = ZoneInfo("Asia/Kolkata")
+
 
 bot = commands.Bot(
     command_prefix='!',
@@ -50,13 +54,15 @@ def extract_date(text):
         text,
         settings={
             'PREFER_DATES_FROM': 'future',
-            'RELATIVE_BASE': datetime.now(),
-            'DATE_ORDER': 'DMY'
+            'RELATIVE_BASE': datetime.now(FRANKFURT_TZ),
+            'DATE_ORDER': 'DMY',
+            'TIMEZONE': 'Europe/Berlin',
+            'RETURN_AS_TIMEZONE_AWARE': True
         },
         languages=['en']
     )
     if result:
-        return result[0][1]
+        return result[0][1].astimezone(FRANKFURT_TZ)
     return None
 
 @bot.event
@@ -79,12 +85,12 @@ async def on_message(message):
         after_by = get_text_after_timeframe_words(message.content, timeframe_words)
         due_date = extract_date(after_by)
         mentioned_mentions = ', '.join(user.mention for user in mentioned_users)
-        now = datetime.now()
+        now = datetime.now(FRANKFURT_TZ)
 
         try:
             if due_date.date() == now.date():
                 # Due date is today, set reminder for 6 PM today
-                reminder_time = now.replace(hour=18, minute=0, second=0, microsecond=0)
+                reminder_time = now.replace(hour=22, minute=30, second=0, microsecond=0).astimezone(FRANKFURT_TZ)
                 reminder_day = ""
                 whentext = "today"
                 digit = 6
@@ -93,7 +99,7 @@ async def on_message(message):
             else:
                 reminder_time = due_date - timedelta(days=1)
                 reminder_day = reminder_time.date()
-                reminder_time = reminder_time.replace(hour=16, minute=0, second=0, microsecond=0)
+                reminder_time = reminder_time.replace(hour=22, minute=35, second=0, microsecond=0).astimezone(FRANKFURT_TZ)
                 whentext = "a day prior i.e. "
                 digit = 4
                 duewhen = "tomorrow"
