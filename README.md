@@ -1,11 +1,11 @@
-A smart Discord bot that helps teams keep track of deadlines and tasks by automatically setting reminders based on natural language messages.
+A smart Discord bot that helps teams keep track of deadlines and tasks by automatically setting reminders based on certain combination of keywords in the messages.
 
 🚀 Features
-Natural Language Parsing: Understands due dates and times from messages (e.g., "by Monday", "by 3-06-2025 7pm", "by EOD").
+Natural Language Parsing: Understands due dates and times from messages (e.g., "by Monday", "by 3-06-2025", "until tomorrow 7pm"). (dateparser library)
 
 Automatic Reminders: Sets reminders for mentioned users, reminding them 2 hours before the deadline or 15 minutes before if already within 2 hours.
 
-Flexible Time Handling: Handles various date formats, weekdays, and "end of day" (EOD) phrases.
+Flexible Time Handling: Handles various date formats, weekdays and 12/24hr times.
 
 Reaction Management: Users can mark tasks as completed or cancel reminders using ✅ and ❌ reactions.
 
